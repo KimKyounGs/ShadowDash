@@ -5,12 +5,16 @@ public class Player : MonoBehaviour
     private Rigidbody2D rb;
     private Animator anim;
 
-    [SerializeField]
-    private float moveSpeed;
-    [SerializeField]
-    private float jumpForce;
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float jumpForce;
 
+    [Header("대시 정보")]
+    [SerializeField] private float dashSpeed;
+    [SerializeField] private float dashDuration;
+    [SerializeField] private float dashTime;
 
+    [SerializeField] private float dashCooldown;
+    [SerializeField] private float dashCooldownTimer;
    
     private float xInput;
 
@@ -30,11 +34,21 @@ public class Player : MonoBehaviour
     }
     
     void Update()
-    {
-               
+    {   
         CheckInput();
         Movement();
         CollisionCheck();
+
+
+        dashTime -= Time.deltaTime;
+        dashCooldownTimer -= Time.deltaTime;
+        // 쿨타임 도 양수일 때만 가능하게끔 한다.
+        if(Input.GetKeyDown(KeyCode.LeftShift) && dashCooldownTimer < 0)
+        {
+            dashCooldownTimer = dashCooldown;
+            dashTime = dashDuration;
+        }
+
         FlipController();
         AnimatorControllers();
 
@@ -57,7 +71,15 @@ public class Player : MonoBehaviour
 
     private void Movement()
     {
-        rb.linearVelocity = new Vector2(xInput * moveSpeed, rb.linearVelocity.y);
+        if (dashTime > 0)
+        {
+            rb.linearVelocity = new Vector2(xInput * dashSpeed,0);
+        }
+        else
+        {
+            rb.linearVelocity = new Vector2(xInput * moveSpeed, rb.linearVelocity.y);
+        }
+
     }
 
     private void Jump()
@@ -67,16 +89,14 @@ public class Player : MonoBehaviour
     }
 
 
-
-
-
     //Alt + 화살표키
     private void AnimatorControllers()
     {
-
         bool isMoving = rb.linearVelocity.x != 0;
+        anim.SetFloat("yVelocity", rb.linearVelocity.y);
         anim.SetBool("isMoving", isMoving);
-
+        anim.SetBool("isGrounded", isGrounded);
+        anim.SetBool("isDashing", dashTime > 0);
     }
 
     private void Flip()
