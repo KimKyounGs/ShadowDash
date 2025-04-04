@@ -1,10 +1,7 @@
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : Entity
 {
-    private Rigidbody2D rb;
-    private Animator anim;
-
     [SerializeField] private float moveSpeed;
     [SerializeField] private float jumpForce;
 
@@ -15,17 +12,6 @@ public class Player : MonoBehaviour
 
     [SerializeField] private float dashCooldown;
     [SerializeField] private float dashCooldownTimer;
-   
-    private float xInput;
-
-    private int facingDir = 1;
-    private bool facingRight = true;
-
-    
-    [Header("Ground Check")]
-    [SerializeField] private float groundCheckDistance;
-    [SerializeField] private LayerMask whatIsGround;
-    private bool isGrounded;
 
     [Header("공격 정보")]
     [SerializeField] private float comboTime = 0.3f;
@@ -33,17 +19,19 @@ public class Player : MonoBehaviour
     private bool isAttacking;
     private int comboCounter;
 
-    void Start()
+    private float xInput;
+
+    protected override void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        anim = GetComponentInChildren<Animator>();
+        base.Start();
     }
     
-    void Update()
+    protected override void Update()
     {   
+        base.Update();
+
         CheckInput();
         Movement();
-        CollisionCheck();
 
 
         dashTime -= Time.deltaTime;
@@ -67,10 +55,7 @@ public class Player : MonoBehaviour
         }
 
     }
-    void CollisionCheck()
-    {
-        isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, whatIsGround);
-    }
+
     private void CheckInput()
     {
         
@@ -153,13 +138,6 @@ public class Player : MonoBehaviour
         anim.SetBool("isDashing", dashTime > 0);
         anim.SetBool("isAttacking", isAttacking);
         anim.SetInteger("comboCounter", comboCounter);
-    }
-
-    private void Flip()
-    {
-        facingDir = facingDir * -1;
-        facingRight = !facingRight;
-        transform.Rotate(0, 180, 0);
     }
 
 
